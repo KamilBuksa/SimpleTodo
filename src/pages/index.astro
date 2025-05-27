@@ -1,8 +1,11 @@
 ---
-import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
+import { TaskView } from "../components/tasks/TaskView";
+import { ErrorBoundary } from "../components/tasks/ErrorBoundary";
 ---
 
 <Layout>
-  <Welcome />
+  <ErrorBoundary client:load>
+    <TaskView />
+  </ErrorBoundary>
 </Layout>

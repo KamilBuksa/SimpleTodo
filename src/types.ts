@@ -51,4 +51,23 @@ export interface TodoQueryParams {
   limit?: number
   sort?: 'created_at' | 'updated_at' | 'deadline'
   order?: 'asc' | 'desc'
+}
+
+// View Models for frontend state
+export interface TaskViewModel extends TodoItemDTO {
+  isEditing: boolean
+  isSaving: boolean
+  validationErrors?: Record<string, string>
+}
+
+export interface TaskFormViewModel {
+  initialValues?: Partial<CreateTodoCommandDTO>
+  isSubmitting: boolean
+  errors: Record<string, string>
+}
+
+export interface TaskListViewModel {
+  tasks: TaskViewModel[]
+  isLoading: boolean
+  error?: string | null
 } 
