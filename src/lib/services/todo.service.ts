@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../db/database.types';
-import type { TodoQueryParams, TodoListResponseDTO, TodoItemDTO, PaginationDTO } from '../../types';
+import type { TodoQueryParams, TodoListResponseDTO, TodoItemDTO, PaginationDTO, CreateTodoCommandDTO } from '../../types';
 
 export class TodoService {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
@@ -55,6 +55,40 @@ export class TodoService {
     return {
       todos,
       pagination,
+    };
+  }
+
+  async createTodo(userId: string, command: CreateTodoCommandDTO): Promise<TodoItemDTO> {
+    const { data, error } = await this.supabase
+      .from('todos')
+      .insert([
+        {
+          user_id: userId,
+          title: command.title,
+          description: command.description,
+          deadline: command.deadline,
+          completed: false,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create todo: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Failed to create todo: No data returned');
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      deadline: data.deadline,
+      completed: data.completed,
     };
   }
 } 
