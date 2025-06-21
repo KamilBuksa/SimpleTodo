@@ -40,7 +40,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, 
 
   return (
     <li
-      className={`rounded border border-gray-200 p-4 shadow-sm dark:border-gray-700 animate-fade-slide-up transition-all ${deadlineStatus.color} ${task.completed ? "opacity-60" : ""}`}
+      className={`rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm animate-fade-slide-up transition-all duration-200 ${deadlineStatus.color} ${task.completed ? "opacity-60" : ""}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">

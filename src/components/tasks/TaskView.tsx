@@ -4,7 +4,7 @@ import { TaskForm } from "./TaskForm";
 import { Dashboard } from "./Dashboard";
 import { SearchBar } from "./SearchBar";
 import { DragDropTaskList } from "./DragDropTaskList";
-import type { TodoQueryParams } from "../../types";
+import type { TodoQueryParams, CreateTodoCommandDTO } from "../../types";
 import { exportTasksToCSV, downloadCSV, parseCSVToTasks } from "../../lib/utils";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore – sonner types via stub
@@ -125,14 +125,14 @@ export const TaskView: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl p-4">
-      <header className="mb-6">
+    <div className="container mx-auto max-w-4xl p-6">
+      <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">Your tasks</h1>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your tasks</h2>
             <button
               onClick={() => setShowDashboard(!showDashboard)}
-              className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200"
             >
               {showDashboard ? "📊 Hide Stats" : "📊 Show Stats"}
             </button>
@@ -186,7 +186,7 @@ export const TaskView: React.FC = () => {
             </button>
           ))}
         </div>
-      </header>
+      </div>
 
       {/* Dashboard */}
       {showDashboard && <Dashboard tasks={tasks} allTasks={allTasks} />}
@@ -200,10 +200,10 @@ export const TaskView: React.FC = () => {
 
       {/* Create Task Form */}
       {isCreating && (
-        <div className="mb-6 rounded border border-gray-200 p-4 shadow-sm dark:border-gray-700">
+        <div className="mb-6 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm transition-colors duration-200">
           <TaskForm
             onSubmit={async (values) => {
-              await createTask(values);
+              await createTask(values as CreateTodoCommandDTO);
               setIsCreating(false);
             }}
             onCancel={() => setIsCreating(false)}
