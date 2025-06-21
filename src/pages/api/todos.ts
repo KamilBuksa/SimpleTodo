@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { APIRoute } from 'astro';
 import type { TodoListResponseDTO, TodoQueryParams } from '../../types';
 import { TodoService } from '../../lib/services/todo.service';
+import { DEFAULT_USER_ID } from '../../db/supabase.client';
+import { createTodoSchema } from '../../lib/schemas/todo.schema';
 
 export const prerender = false;
 
@@ -21,27 +23,9 @@ export const GET: APIRoute = async ({ request, locals }): Promise<Response> => {
       Object.fromEntries(new URL(request.url).searchParams)
     );
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await locals.supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'User not authenticated',
-          },
-        }),
-        { 
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Get todos using the service
+    // Use default user for simplicity (no authentication required)
     const todoService = new TodoService(locals.supabase);
-    const result = await todoService.getTodos(user.id, queryParams);
+    const result = await todoService.getTodos(DEFAULT_USER_ID, queryParams);
 
     return new Response(
       JSON.stringify(result),
@@ -84,4 +68,74 @@ export const GET: APIRoute = async ({ request, locals }): Promise<Response> => {
       }
     );
   }
-}; 
+};
+
+export const POST: APIRoute = async ({ request, locals }): Promise<Response> => {
+  try {
+    // Parse and validate request body
+    const body = await request.json();
+    const command = createTodoSchema.parse(body);
+
+    // Use default user for simplicity (no authentication required)
+    const todoService = new TodoService(locals.supabase);
+    const result = await todoService.createTodo(DEFAULT_USER_ID, command);
+
+    return new Response(
+      JSON.stringify(result),
+      { 
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid request body',
+            details: error.errors,
+          },
+        }),
+        { 
+          status: 422,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (error instanceof Error && error.message.includes('Failed to create todo')) {
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: 'CREATE_FAILED',
+            message: error.message,
+          },
+        }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Log unexpected errors
+    console.error('Error in POST /api/todos:', error);
+    
+    return new Response(
+      JSON.stringify({
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'An unexpected error occurred',
+        },
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+};
+
+ 

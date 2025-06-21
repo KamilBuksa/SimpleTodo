@@ -1,25 +1,30 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
-import type { TodoQueryParams, TodoListResponseDTO, TodoItemDTO, PaginationDTO, CreateTodoCommandDTO } from '../../types';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../db/database.types";
+import type {
+  TodoQueryParams,
+  TodoListResponseDTO,
+  TodoItemDTO,
+  PaginationDTO,
+  CreateTodoCommandDTO,
+  UpdateTodoCommandDTO,
+  ToggleTodoStatusCommandDTO,
+} from "../../types";
 
 export class TodoService {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
 
   async getTodos(userId: string, params: TodoQueryParams): Promise<TodoListResponseDTO> {
     // Start building the query
-    let query = this.supabase
-      .from('todos')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId);
+    let query = this.supabase.from("todos").select("*", { count: "exact" }).eq("user_id", userId);
 
     // Apply status filter
-    if (params.status && params.status !== 'all') {
-      query = query.eq('completed', params.status === 'completed');
+    if (params.status && params.status !== "all") {
+      query = query.eq("completed", params.status === "completed");
     }
 
     // Apply sorting
-    query = query.order(params.sort || 'created_at', {
-      ascending: params.order === 'asc',
+    query = query.order(params.sort || "created_at", {
+      ascending: params.order === "asc",
     });
 
     // Apply pagination
@@ -27,7 +32,7 @@ export class TodoService {
     const page = params.page || 1;
     const from = (page - 1) * limit;
     const to = from + limit - 1;
-    
+
     query = query.range(from, to);
 
     // Execute query
@@ -38,7 +43,7 @@ export class TodoService {
     }
 
     // Transform data to DTOs
-    const todos: TodoItemDTO[] = data.map(todo => ({
+    const todos: TodoItemDTO[] = data.map((todo) => ({
       ...todo,
       completed: todo.completed || false,
     }));
@@ -58,9 +63,36 @@ export class TodoService {
     };
   }
 
+  async getTodoById(userId: string, todoId: string): Promise<TodoItemDTO> {
+    const { data, error } = await this.supabase
+      .from("todos")
+      .select("*")
+      .eq("id", todoId)
+      .eq("user_id", userId)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to get todo: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error("Todo not found or you do not have permission to view it");
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      deadline: data.deadline,
+      completed: data.completed || false,
+    };
+  }
+
   async createTodo(userId: string, command: CreateTodoCommandDTO): Promise<TodoItemDTO> {
     const { data, error } = await this.supabase
-      .from('todos')
+      .from("todos")
       .insert([
         {
           user_id: userId,
@@ -78,7 +110,7 @@ export class TodoService {
     }
 
     if (!data) {
-      throw new Error('Failed to create todo: No data returned');
+      throw new Error("Failed to create todo: No data returned");
     }
 
     return {
@@ -91,4 +123,72 @@ export class TodoService {
       completed: data.completed,
     };
   }
-} 
+
+  async updateTodo(userId: string, todoId: string, command: UpdateTodoCommandDTO): Promise<TodoItemDTO> {
+    const { data, error } = await this.supabase
+      .from("todos")
+      .update({
+        title: command.title,
+        description: command.description,
+        deadline: command.deadline,
+      })
+      .eq("id", todoId)
+      .eq("user_id", userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update todo: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error("Todo not found or you do not have permission to update it");
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      deadline: data.deadline,
+      completed: data.completed,
+    };
+  }
+
+  async toggleTodoStatus(
+    userId: string,
+    todoId: string,
+    command: ToggleTodoStatusCommandDTO
+  ): Promise<{ id: string; completed: boolean; updated_at: string }> {
+    const { data, error } = await this.supabase
+      .from("todos")
+      .update({ completed: command.completed })
+      .eq("id", todoId)
+      .eq("user_id", userId)
+      .select("id, completed, updated_at")
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to toggle todo status: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error("Todo not found or you do not have permission to update it");
+    }
+
+    return {
+      id: data.id,
+      completed: data.completed || false,
+      updated_at: data.updated_at,
+    };
+  }
+
+  async deleteTodo(userId: string, todoId: string): Promise<void> {
+    const { error } = await this.supabase.from("todos").delete().eq("id", todoId).eq("user_id", userId);
+
+    if (error) {
+      throw new Error(`Failed to delete todo: ${error.message}`);
+    }
+  }
+}
