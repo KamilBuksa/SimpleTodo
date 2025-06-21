@@ -38,7 +38,9 @@ export const TaskView: React.FC = () => {
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your tasks</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300">
+              Your tasks
+            </h2>
             <div className="flex gap-2">
               <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
@@ -151,10 +153,12 @@ export const TaskView: React.FC = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your tasks</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300">
+              Your tasks
+            </h2>
             <button
               onClick={() => setShowDashboard(!showDashboard)}
-              className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200"
+              className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-300"
             >
               {showDashboard ? "📊 Hide Stats" : "📊 Show Stats"}
             </button>
@@ -198,7 +202,7 @@ export const TaskView: React.FC = () => {
               className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ease-out hover:scale-105 animate-fade-slide-up ${
                 filters.status === option.value
                   ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300"
               }`}
               style={{ animationDelay: `${index * 50}ms` }}
             >

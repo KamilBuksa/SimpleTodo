@@ -24,7 +24,9 @@ const { title = "Task Manager" } = Astro.props;
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
-          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">📋 Task Manager</h1>
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300">
+            📋 Task Manager
+          </h1>
           <ThemeToggle client:load />
         </div>
       </div>

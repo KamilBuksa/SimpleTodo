@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getPriorityLabel, parseTimeEstimate, formatTimeEstimate } from "../../lib/utils";
+import { PrioritySelect } from "../ui/priority-select";
+import { parseTimeEstimate, formatTimeEstimate } from "../../lib/utils";
 import type { CreateTodoCommandDTO, UpdateTodoCommandDTO } from "../../types";
 
 interface TaskFormProps {
@@ -93,9 +94,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ initialValues, onSubmit, onC
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300"
+        >
           Title
         </label>
         <input
@@ -106,13 +110,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({ initialValues, onSubmit, onC
             setTitle(e.target.value);
             setTouchedFields((prev) => new Set(prev).add("title"));
           }}
-          className="mt-1 w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200"
+          className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
         />
         {errors.title && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title}</p>}
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300"
+        >
           Description (optional)
         </label>
         <textarea
@@ -123,13 +130,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({ initialValues, onSubmit, onC
             setTouchedFields((prev) => new Set(prev).add("description"));
           }}
           rows={3}
-          className="mt-1 w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200"
+          className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 resize-none"
         />
         {errors.description && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>}
       </div>
 
       <div>
-        <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="deadline"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300"
+        >
           Deadline (optional)
         </label>
         <input
@@ -140,32 +150,33 @@ export const TaskForm: React.FC<TaskFormProps> = ({ initialValues, onSubmit, onC
             setDeadline(e.target.value);
             setTouchedFields((prev) => new Set(prev).add("deadline"));
           }}
-          className="mt-1 w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200"
+          className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
         />
       </div>
 
       <div>
-        <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="priority"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300"
+        >
           Priority
         </label>
-        <select
+        <PrioritySelect
           id="priority"
           value={priority}
-          onChange={(e) => {
-            setPriority(e.target.value as "low" | "medium" | "high" | "urgent");
+          onChange={(newPriority) => {
+            setPriority(newPriority);
             setTouchedFields((prev) => new Set(prev).add("priority"));
           }}
-          className="mt-1 w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200"
-        >
-          <option value="low">🔵 {getPriorityLabel("low")}</option>
-          <option value="medium">🟡 {getPriorityLabel("medium")}</option>
-          <option value="high">🟠 {getPriorityLabel("high")}</option>
-          <option value="urgent">🔴 {getPriorityLabel("urgent")}</option>
-        </select>
+          disabled={isSubmitting}
+        />
       </div>
 
       <div>
-        <label htmlFor="time_estimate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="time_estimate"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300"
+        >
           Time Estimate (optional)
         </label>
         <input
@@ -177,7 +188,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ initialValues, onSubmit, onC
             setTouchedFields((prev) => new Set(prev).add("time_estimate"));
           }}
           placeholder="e.g., 2h, 30m, 2h30m, 1d"
-          className="mt-1 w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200"
+          className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
         />
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Format: 2h (hours), 30m (minutes), 2h30m (combined), 1d (days)
@@ -185,12 +196,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ initialValues, onSubmit, onC
         {errors.time_estimate && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.time_estimate}</p>}
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button type="submit" disabled={isSubmitting}>
+      <div className="flex items-center gap-3 pt-2">
+        <Button type="submit" disabled={isSubmitting} className="btn-hover-lift">
           {isSubmitting ? "Saving…" : "Save"}
         </Button>
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting} className="btn-hover-lift">
             Cancel
           </Button>
         )}

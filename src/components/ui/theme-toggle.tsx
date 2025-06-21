@@ -22,13 +22,13 @@ export const ThemeToggle: React.FC = () => {
 
   const toggleTheme = () => {
     const newTheme = !isDark;
-    setIsDark(newTheme);
 
-    // Update localStorage
-    localStorage.setItem("theme", newTheme ? "dark" : "light");
-
-    // Apply theme to document with smooth transition
+    // Apply theme to document immediately for synchronous transition
     document.documentElement.classList.toggle("dark", newTheme);
+
+    // Update state and localStorage
+    setIsDark(newTheme);
+    localStorage.setItem("theme", newTheme ? "dark" : "light");
   };
 
   return (

@@ -66,7 +66,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ allTasks }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Completion Rate */}
         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-all duration-200 ease-out">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Completion Rate</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+            Completion Rate
+          </h3>
           <div className="flex items-center gap-3">
             <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
               <div
@@ -78,7 +80,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ allTasks }) => {
               />
             </div>
             <span
-              className="text-lg font-semibold text-gray-900 dark:text-gray-100 animate-fade-slide-up"
+              className="text-lg font-semibold text-gray-900 dark:text-gray-100 animate-fade-slide-up transition-colors duration-300"
               style={{ animationDelay: "500ms" }}
             >
               {stats.completionRate}%
@@ -88,7 +90,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ allTasks }) => {
 
         {/* Today's Activity */}
         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-all duration-200 ease-out">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Today&apos;s Activity</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Today&apos;s Activity</h3>
           <div className="space-y-1">
             <div className="flex justify-between text-sm animate-fade-slide-up" style={{ animationDelay: "400ms" }}>
               <span className="text-gray-600 dark:text-gray-400">Created:</span>

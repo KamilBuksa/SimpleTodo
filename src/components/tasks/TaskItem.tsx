@@ -2,7 +2,14 @@ import React, { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import type { TaskViewModel, UpdateTodoCommandDTO } from "../../types";
 import { TaskForm } from "./TaskForm";
-import { getDeadlineStatus, formatDeadline, getPriorityColor, getPriorityIcon, getPriorityLabel, formatTimeEstimate } from "../../lib/utils";
+import {
+  getDeadlineStatus,
+  formatDeadline,
+  getPriorityColor,
+  getPriorityIcon,
+  getPriorityLabel,
+  formatTimeEstimate,
+} from "../../lib/utils";
 
 interface TaskItemProps {
   task: TaskViewModel;
@@ -42,28 +49,34 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, 
 
   return (
     <li
-      className={`rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm animate-fade-slide-up transition-all duration-200 ${deadlineStatus.color} ${task.completed ? "opacity-60" : ""}`}
+      className={`card-enhanced p-4 animate-fade-slide-up ${deadlineStatus.color} ${task.completed ? "opacity-60" : ""}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-start gap-2 mb-1">
-            <h2 className={`text-lg font-medium flex-1 ${task.completed ? "line-through text-gray-400" : ""}`}>{task.title}</h2>
-            
+            <h2
+              className={`text-lg font-medium flex-1 transition-colors duration-300 ${task.completed ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-900 dark:text-gray-100"}`}
+            >
+              {task.title}
+            </h2>
+
             {/* Priority indicator */}
-            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${getPriorityColor(task.priority)} animate-fade-slide-up`}>
+            <div className={`priority-indicator ${getPriorityColor(task.priority)} animate-fade-slide-up`}>
               <span className="animate-bounce-gentle">{getPriorityIcon(task.priority)}</span>
               {getPriorityLabel(task.priority)}
             </div>
           </div>
 
-          {task.description && <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>}
+          {task.description && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">
+              {task.description}
+            </p>
+          )}
 
           <div className="flex items-center gap-3 mt-2">
             {/* Deadline indicator */}
             {task.deadline && (
-              <div
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${deadlineStatus.textColor} animate-fade-slide-up hover:scale-105 transition-all duration-200 ease-out`}
-              >
+              <div className={`priority-indicator ${deadlineStatus.textColor} animate-fade-slide-up`}>
                 <span className="animate-bounce-gentle">📅</span> {formatDeadline(task.deadline)}
                 {deadlineStatus.label && deadlineStatus.status !== "future" && (
                   <span className="font-semibold animate-pulse-glow">• {deadlineStatus.label}</span>
@@ -73,7 +86,7 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, 
 
             {/* Time estimate indicator */}
             {task.time_estimate && (
-              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 animate-fade-slide-up hover:scale-105 transition-all duration-200 ease-out">
+              <div className="priority-indicator bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 animate-fade-slide-up">
                 <span className="animate-bounce-gentle">⏱️</span> {formatTimeEstimate(task.time_estimate)}
               </div>
             )}
@@ -84,24 +97,14 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, 
             variant={task.completed ? "outline" : "default"}
             size="sm"
             onClick={() => onToggle(task.id, !task.completed)}
-            className="hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 ease-out"
+            className="btn-hover-lift"
           >
             {task.completed ? "Undo" : "Done"}
           </Button>
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={() => setIsEditing(true)}
-            className="hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 ease-out"
-          >
+          <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)} className="btn-hover-lift">
             Edit
           </Button>
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            onClick={() => onDelete(task.id)}
-            className="hover:scale-105 hover:-translate-y-0.5 hover:wiggle transition-all duration-200 ease-out"
-          >
+          <Button variant="destructive" size="sm" onClick={() => onDelete(task.id)} className="btn-hover-lift">
             Delete
           </Button>
         </div>

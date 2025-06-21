@@ -118,14 +118,115 @@
     @apply bg-background text-foreground;
   }
   
+  /* Ensure consistent transitions for headings */
+  h1, h2, h3, h4, h5, h6 {
+    transition: color 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
   /* Smooth transitions for dark mode */
   html {
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1), color 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   * {
-    transition-property: background-color, border-color, color, fill, stroke;
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow, transform;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 200ms;
+    transition-duration: 300ms;
+  }
+  
+  /* Enhanced focus styles for better accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-blue-500 outline-offset-2 rounded-sm;
+  }
+  
+  /* Improved dark mode scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
+
+@layer components {
+  /* Custom animations */
+  .animate-fade-slide-up {
+    animation: fadeSlideUp 0.2s ease-out;
+  }
+  
+  .animate-bounce-gentle {
+    animation: bounceGentle 2s ease-in-out infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulseGlow 1.5s ease-in-out infinite;
+  }
+  
+  /* Enhanced button hover effects */
+  .btn-hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .btn-hover-lift:hover {
+    @apply transform -translate-y-0.5 shadow-lg;
+  }
+  
+  /* Enhanced card styles for dark mode */
+  .card-enhanced {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .card-enhanced:hover {
+    @apply shadow-md dark:shadow-gray-900/20;
+  }
+  
+  /* Priority indicator enhancements */
+  .priority-indicator {
+    @apply inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .priority-indicator:hover {
+    @apply scale-105 shadow-sm;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }
