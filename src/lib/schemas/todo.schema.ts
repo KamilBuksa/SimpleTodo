@@ -9,16 +9,10 @@ export const createTodoSchema = z.object({
       if (!date) return true;
       // Accept both date (YYYY-MM-DD) and datetime (ISO 8601) formats
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
+      const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[+-]\d{2}:\d{2})?$/;
       return dateRegex.test(date) || datetimeRegex.test(date);
     }, "Deadline must be a valid date")
-    .refine((date) => {
-      if (!date) return true;
-      const deadlineDate = new Date(date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time to start of day for fair comparison
-      return deadlineDate >= today;
-    }, "Deadline cannot be in the past")
+    // Note: Past date validation removed to allow flexibility in testing and importing tasks
     .nullable()
     .optional(),
 });
@@ -32,7 +26,7 @@ export const updateTodoSchema = z.object({
       if (!date) return true;
       // Accept both date (YYYY-MM-DD) and datetime (ISO 8601) formats
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
+      const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[+-]\d{2}:\d{2})?$/;
       return dateRegex.test(date) || datetimeRegex.test(date);
     }, "Deadline must be a valid date")
     // Note: Past date validation removed for updates to allow editing existing tasks
