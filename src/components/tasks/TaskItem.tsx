@@ -1,6 +1,6 @@
 import React, { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
-import type { TaskViewModel } from "../../types";
+import type { TaskViewModel, UpdateTodoCommandDTO } from "../../types";
 import { TaskForm } from "./TaskForm";
 import { getDeadlineStatus, formatDeadline } from "../../lib/utils";
 
@@ -8,7 +8,7 @@ interface TaskItemProps {
   task: TaskViewModel;
   onToggle: (id: string, completed: boolean) => void;
   onDelete: (id: string) => void;
-  onUpdate: (id: string, updates: Partial<TaskViewModel>) => void;
+  onUpdate: (id: string, updates: UpdateTodoCommandDTO) => void;
 }
 
 const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, onUpdate }) => {
@@ -16,19 +16,23 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, 
   const deadlineStatus = getDeadlineStatus(task.deadline);
 
   if (isEditing) {
+    // Convert deadline from datetime format to date format for the form
+    const deadlineForForm = task.deadline ? task.deadline.split("T")[0] : undefined;
+
     return (
       <li className="rounded border border-gray-200 p-4 shadow-sm dark:border-gray-700 animate-fade-slide-up transition-all">
         <TaskForm
           initialValues={{
             title: task.title,
             description: task.description ?? undefined,
-            deadline: task.deadline ?? undefined,
+            deadline: deadlineForForm,
           }}
           onSubmit={async (values) => {
-            await onUpdate(task.id, values);
+            await onUpdate(task.id, values as UpdateTodoCommandDTO);
             setIsEditing(false);
           }}
           onCancel={() => setIsEditing(false)}
+          isEditing={true}
         />
       </li>
     );

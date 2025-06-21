@@ -125,13 +125,33 @@ export class TodoService {
   }
 
   async updateTodo(userId: string, todoId: string, command: UpdateTodoCommandDTO): Promise<TodoItemDTO> {
+    // Filter out undefined values to avoid issues with Supabase
+    const updateData: Partial<{
+      title: string;
+      description: string | null;
+      deadline: string | null;
+    }> = {};
+
+    if (command.title !== undefined) {
+      updateData.title = command.title;
+    }
+
+    if (command.description !== undefined) {
+      updateData.description = command.description;
+    }
+
+    if (command.deadline !== undefined) {
+      updateData.deadline = command.deadline;
+    }
+
+    // If no fields to update, return current todo
+    if (Object.keys(updateData).length === 0) {
+      return this.getTodoById(userId, todoId);
+    }
+
     const { data, error } = await this.supabase
       .from("todos")
-      .update({
-        title: command.title,
-        description: command.description,
-        deadline: command.deadline,
-      })
+      .update(updateData)
       .eq("id", todoId)
       .eq("user_id", userId)
       .select()

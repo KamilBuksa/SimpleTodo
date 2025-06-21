@@ -8,6 +8,7 @@ import type {
   UpdateTodoCommandDTO,
   TodoQueryParams,
 } from "../../types";
+import { searchTasks } from "../../lib/utils";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore – sonner types via stub
 import { toast } from "sonner";
@@ -25,6 +26,9 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
     error: null,
   });
 
+  const [allTasks, setAllTasks] = useState<TaskViewModel[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [allTasksCount, setAllTasksCount] = useState({
     total: 0,
     completed: 0,
@@ -38,14 +42,26 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
       try {
         // Fetch all tasks for counts (without filters)
         const allTasksRes = await fetch(API_BASE);
-        if (!allTasksRes.ok) throw new Error(`Error ${allTasksRes.status}`);
+        if (!allTasksRes.ok) {
+          console.warn("Failed to fetch tasks for count update:", allTasksRes.status);
+          return;
+        }
         const allTasksData: TodoListResponseDTO = await allTasksRes.json();
 
-        // Update counts
-        const total = allTasksData.todos.length;
-        const completed = allTasksData.todos.filter((t) => t.completed).length;
+        // Update counts and all tasks
+        const todos = allTasksData.todos || [];
+        const total = todos.length;
+        const completed = todos.filter((t) => t.completed).length;
         const active = total - completed;
         setAllTasksCount({ total, completed, active });
+
+        // Store all tasks
+        const allTasksFormatted: TaskViewModel[] = todos.map((todo) => ({
+          ...todo,
+          isEditing: false,
+          isSaving: false,
+        }));
+        setAllTasks(allTasksFormatted);
 
         // Build query string with filters for displayed tasks
         const queryParams = new URLSearchParams();
@@ -97,6 +113,14 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
       const completed = todos.filter((t) => t.completed).length;
       const active = total - completed;
       setAllTasksCount({ total, completed, active });
+
+      // Update all tasks
+      const allTasksFormatted: TaskViewModel[] = todos.map((todo) => ({
+        ...todo,
+        isEditing: false,
+        isSaving: false,
+      }));
+      setAllTasks(allTasksFormatted);
     } catch (error) {
       console.error("Failed to update task counts", error);
     }
@@ -137,6 +161,9 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
           ...prev,
           tasks: prev.tasks.map((t) => (t.id === optimisticId ? { ...created, isEditing: false, isSaving: false } : t)),
         }));
+
+        // Update all tasks
+        await updateTaskCounts();
         toast.success("Task created");
       } catch (error) {
         console.error("Failed to create task", error);
@@ -153,37 +180,43 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
     [updateTaskCounts]
   );
 
-  const updateTask = useCallback(async (id: string, payload: UpdateTodoCommandDTO) => {
-    setState((prev) => ({
-      ...prev,
-      tasks: prev.tasks.map((task) => (task.id === id ? { ...task, ...payload, isSaving: true } : task)),
-    }));
-
-    try {
-      const res = await fetch(`${API_BASE}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-
-      const updated: TodoItemDTO = await res.json();
+  const updateTask = useCallback(
+    async (id: string, payload: UpdateTodoCommandDTO) => {
       setState((prev) => ({
         ...prev,
-        tasks: prev.tasks.map((task) => (task.id === id ? { ...updated, isEditing: false, isSaving: false } : task)),
+        tasks: prev.tasks.map((task) => (task.id === id ? { ...task, ...payload, isSaving: true } : task)),
       }));
-      toast.success("Task updated");
-    } catch (error) {
-      console.error("Failed to update task", error);
-      setState((prev) => ({ ...prev, error: "Failed to update task" }));
-      // Rollback saved flag
-      setState((prev) => ({
-        ...prev,
-        tasks: prev.tasks.map((task) => (task.id === id ? { ...task, isSaving: false } : task)),
-      }));
-      toast.error("Failed to update task");
-    }
-  }, []);
+
+      try {
+        const res = await fetch(`${API_BASE}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+
+        const updated: TodoItemDTO = await res.json();
+        setState((prev) => ({
+          ...prev,
+          tasks: prev.tasks.map((task) => (task.id === id ? { ...updated, isEditing: false, isSaving: false } : task)),
+        }));
+
+        // Update all tasks
+        await updateTaskCounts();
+        toast.success("Task updated");
+      } catch (error) {
+        console.error("Failed to update task", error);
+        setState((prev) => ({ ...prev, error: "Failed to update task" }));
+        // Rollback saved flag
+        setState((prev) => ({
+          ...prev,
+          tasks: prev.tasks.map((task) => (task.id === id ? { ...task, isSaving: false } : task)),
+        }));
+        toast.error("Failed to update task");
+      }
+    },
+    [updateTaskCounts]
+  );
 
   const toggleTask = useCallback(
     async (id: string, completed: boolean) => {
@@ -206,6 +239,9 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
           body: JSON.stringify({ completed }),
         });
         if (!res.ok) throw new Error(`Error ${res.status}`);
+
+        // Update all tasks
+        await updateTaskCounts();
         toast.success(completed ? "Task completed" : "Task marked as active");
       } catch (error) {
         console.error("Failed to toggle task status", error);
@@ -242,6 +278,9 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
       try {
         const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error(`Error ${res.status}`);
+
+        // Update all tasks
+        await updateTaskCounts();
         toast.success("Task deleted");
       } catch (error) {
         console.error("Failed to delete task", error);
@@ -254,12 +293,42 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
     [state.tasks, updateTaskCounts]
   );
 
+  // Apply search filter to current tasks
+  const filteredTasks = searchTasks(state.tasks, searchTerm);
+
+  const reorderTasks = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      // Since we're working with filtered tasks, we need to find the actual indices
+      // in the original tasks array
+      const originalFromIndex = state.tasks.findIndex((task) => task.id === filteredTasks[fromIndex]?.id);
+      const originalToIndex = state.tasks.findIndex((task) => task.id === filteredTasks[toIndex]?.id);
+
+      if (originalFromIndex === -1 || originalToIndex === -1) {
+        console.error("Could not find original indices for reorder");
+        return;
+      }
+
+      setState((prev) => {
+        const newTasks = [...prev.tasks];
+        const [movedTask] = newTasks.splice(originalFromIndex, 1);
+        newTasks.splice(originalToIndex, 0, movedTask);
+        return { ...prev, tasks: newTasks };
+      });
+    },
+    [state.tasks, filteredTasks]
+  );
+
   return {
     ...state,
+    tasks: filteredTasks,
+    allTasks,
     allTasksCount,
+    searchTerm,
+    setSearchTerm,
     createTask,
     updateTask,
     toggleTask,
     deleteTask,
+    reorderTasks,
   };
 };
