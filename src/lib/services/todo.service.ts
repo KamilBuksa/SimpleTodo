@@ -46,6 +46,8 @@ export class TodoService {
     const todos: TodoItemDTO[] = data.map((todo) => ({
       ...todo,
       completed: todo.completed || false,
+      priority: todo.priority || "medium",
+      time_estimate: todo.time_estimate,
     }));
 
     // Calculate pagination metadata
@@ -87,6 +89,8 @@ export class TodoService {
       updated_at: data.updated_at,
       deadline: data.deadline,
       completed: data.completed || false,
+      priority: data.priority || "medium",
+      time_estimate: data.time_estimate,
     };
   }
 
@@ -99,6 +103,8 @@ export class TodoService {
           title: command.title,
           description: command.description,
           deadline: command.deadline,
+          priority: command.priority || "medium",
+          time_estimate: command.time_estimate,
           completed: false,
         },
       ])
@@ -121,6 +127,8 @@ export class TodoService {
       updated_at: data.updated_at,
       deadline: data.deadline,
       completed: data.completed,
+      priority: data.priority || "medium",
+      time_estimate: data.time_estimate,
     };
   }
 
@@ -130,6 +138,8 @@ export class TodoService {
       title: string;
       description: string | null;
       deadline: string | null;
+      priority: "low" | "medium" | "high" | "urgent";
+      time_estimate: number | null;
     }> = {};
 
     if (command.title !== undefined) {
@@ -142,6 +152,14 @@ export class TodoService {
 
     if (command.deadline !== undefined) {
       updateData.deadline = command.deadline;
+    }
+
+    if (command.priority !== undefined) {
+      updateData.priority = command.priority;
+    }
+
+    if (command.time_estimate !== undefined) {
+      updateData.time_estimate = command.time_estimate;
     }
 
     // If no fields to update, return current todo
@@ -173,6 +191,8 @@ export class TodoService {
       updated_at: data.updated_at,
       deadline: data.deadline,
       completed: data.completed,
+      priority: data.priority || "medium",
+      time_estimate: data.time_estimate,
     };
   }
 

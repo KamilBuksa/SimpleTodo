@@ -2,7 +2,7 @@ import React, { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import type { TaskViewModel, UpdateTodoCommandDTO } from "../../types";
 import { TaskForm } from "./TaskForm";
-import { getDeadlineStatus, formatDeadline } from "../../lib/utils";
+import { getDeadlineStatus, formatDeadline, getPriorityColor, getPriorityIcon, getPriorityLabel, formatTimeEstimate } from "../../lib/utils";
 
 interface TaskItemProps {
   task: TaskViewModel;
@@ -26,6 +26,8 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, 
             title: task.title,
             description: task.description ?? undefined,
             deadline: deadlineForForm,
+            priority: task.priority,
+            time_estimate: task.time_estimate,
           }}
           onSubmit={async (values) => {
             await onUpdate(task.id, values as UpdateTodoCommandDTO);
@@ -44,33 +46,62 @@ const TaskItemComponent: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, 
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h2 className={`text-lg font-medium ${task.completed ? "line-through text-gray-400" : ""}`}>{task.title}</h2>
+          <div className="flex items-start gap-2 mb-1">
+            <h2 className={`text-lg font-medium flex-1 ${task.completed ? "line-through text-gray-400" : ""}`}>{task.title}</h2>
+            
+            {/* Priority indicator */}
+            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${getPriorityColor(task.priority)} animate-fade-slide-up`}>
+              <span className="animate-bounce-gentle">{getPriorityIcon(task.priority)}</span>
+              {getPriorityLabel(task.priority)}
+            </div>
+          </div>
+
           {task.description && <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>}
 
-          {/* Deadline indicator */}
-          {task.deadline && (
-            <div
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium mt-2 ${deadlineStatus.textColor}`}
-            >
-              📅 {formatDeadline(task.deadline)}
-              {deadlineStatus.label && deadlineStatus.status !== "future" && (
-                <span className="font-semibold">• {deadlineStatus.label}</span>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-3 mt-2">
+            {/* Deadline indicator */}
+            {task.deadline && (
+              <div
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${deadlineStatus.textColor} animate-fade-slide-up hover:scale-105 transition-all duration-200 ease-out`}
+              >
+                <span className="animate-bounce-gentle">📅</span> {formatDeadline(task.deadline)}
+                {deadlineStatus.label && deadlineStatus.status !== "future" && (
+                  <span className="font-semibold animate-pulse-glow">• {deadlineStatus.label}</span>
+                )}
+              </div>
+            )}
+
+            {/* Time estimate indicator */}
+            {task.time_estimate && (
+              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 animate-fade-slide-up hover:scale-105 transition-all duration-200 ease-out">
+                <span className="animate-bounce-gentle">⏱️</span> {formatTimeEstimate(task.time_estimate)}
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant={task.completed ? "outline" : "default"}
             size="sm"
             onClick={() => onToggle(task.id, !task.completed)}
+            className="hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 ease-out"
           >
             {task.completed ? "Undo" : "Done"}
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={() => setIsEditing(true)}
+            className="hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 ease-out"
+          >
             Edit
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => onDelete(task.id)}>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            onClick={() => onDelete(task.id)}
+            className="hover:scale-105 hover:-translate-y-0.5 hover:wiggle transition-all duration-200 ease-out"
+          >
             Delete
           </Button>
         </div>

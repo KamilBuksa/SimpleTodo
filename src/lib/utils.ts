@@ -74,7 +74,7 @@ export function formatDeadline(deadline: string | null): string {
 import type { TaskViewModel } from "../types";
 
 export function exportTasksToCSV(tasks: TaskViewModel[]): string {
-  const headers = ["Title", "Description", "Deadline", "Completed", "Created", "Updated"];
+  const headers = ["Title", "Description", "Deadline", "Priority", "Time Estimate", "Completed", "Created", "Updated"];
 
   const csvContent = [
     headers.join(","),
@@ -83,6 +83,8 @@ export function exportTasksToCSV(tasks: TaskViewModel[]): string {
         `"${(task.title || "").replace(/"/g, '""')}"`,
         `"${(task.description || "").replace(/"/g, '""')}"`,
         task.deadline || "",
+        task.priority || "medium",
+        task.time_estimate ? formatTimeEstimate(task.time_estimate) : "",
         task.completed ? "Yes" : "No",
         task.created_at || "",
         task.updated_at || "",
@@ -114,17 +116,22 @@ export function parseCSVToTasks(csvContent: string): Partial<TaskViewModel>[] {
 
   const tasks = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
+  for (const line of lines.slice(1)) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
 
-    const values = parseCSVLine(line);
-    if (values.length >= 4) {
+    const values = parseCSVLine(trimmedLine);
+    if (values.length >= 6) {
+      const timeEstimateStr = values[4]?.replace(/""/g, '"').replace(/^"|"$/g, "") || "";
+      const timeEstimate = timeEstimateStr ? parseTimeEstimate(timeEstimateStr) : null;
+
       tasks.push({
         title: values[0]?.replace(/""/g, '"').replace(/^"|"$/g, "") || "",
         description: values[1]?.replace(/""/g, '"').replace(/^"|"$/g, "") || null,
         deadline: values[2] || null,
-        completed: values[3]?.toLowerCase() === "yes",
+        priority: (values[3] as "low" | "medium" | "high" | "urgent") || "medium",
+        time_estimate: timeEstimate,
+        completed: values[5]?.toLowerCase() === "yes",
       });
     }
   }
@@ -137,9 +144,7 @@ function parseCSVLine(line: string): string[] {
   let current = "";
   let inQuotes = false;
 
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-
+  for (const char of line) {
     if (char === '"') {
       inQuotes = !inQuotes;
     } else if (char === "," && !inQuotes) {
@@ -203,4 +208,104 @@ export function calculateTaskStats(tasks: TaskViewModel[]) {
     createdToday,
     completedToday,
   };
+}
+
+// Priority utilities
+export function getPriorityColor(priority: "low" | "medium" | "high" | "urgent"): string {
+  switch (priority) {
+    case "low":
+      return "text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-700";
+    case "medium":
+      return "text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30";
+    case "high":
+      return "text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30";
+    case "urgent":
+      return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30";
+    default:
+      return "text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-700";
+  }
+}
+
+export function getPriorityIcon(priority: "low" | "medium" | "high" | "urgent"): string {
+  switch (priority) {
+    case "low":
+      return "🔵";
+    case "medium":
+      return "🟡";
+    case "high":
+      return "🟠";
+    case "urgent":
+      return "🔴";
+    default:
+      return "🔵";
+  }
+}
+
+export function getPriorityLabel(priority: "low" | "medium" | "high" | "urgent"): string {
+  switch (priority) {
+    case "low":
+      return "Low";
+    case "medium":
+      return "Medium";
+    case "high":
+      return "High";
+    case "urgent":
+      return "Urgent";
+    default:
+      return "Medium";
+  }
+}
+
+// Time estimate utilities
+export function formatTimeEstimate(minutes: number | null): string {
+  if (!minutes) return "";
+
+  if (minutes < 60) {
+    return `${minutes}m`;
+  } else if (minutes < 1440) {
+    // Less than 24 hours
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (remainingMinutes === 0) {
+      return `${hours}h`;
+    }
+    return `${hours}h ${remainingMinutes}m`;
+  } else {
+    // 24 hours or more
+    const days = Math.floor(minutes / 1440);
+    const remainingHours = Math.floor((minutes % 1440) / 60);
+    if (remainingHours === 0) {
+      return `${days}d`;
+    }
+    return `${days}d ${remainingHours}h`;
+  }
+}
+
+export function parseTimeEstimate(input: string): number | null {
+  if (!input.trim()) return null;
+
+  // Remove all spaces and convert to lowercase
+  const cleanInput = input.replace(/\s+/g, "").toLowerCase();
+
+  // Match patterns like: 2h, 30m, 2h30m, 1d, 1d2h, etc.
+  const timePattern = /^(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?$/;
+  const match = cleanInput.match(timePattern);
+
+  if (!match) {
+    // Try to parse as just a number (assume minutes)
+    const numberMatch = cleanInput.match(/^(\d+)$/);
+    if (numberMatch) {
+      return parseInt(numberMatch[1], 10);
+    }
+    return null;
+  }
+
+  const [, days, hours, minutes] = match;
+  let totalMinutes = 0;
+
+  if (days) totalMinutes += parseInt(days, 10) * 1440; // 24 * 60
+  if (hours) totalMinutes += parseInt(hours, 10) * 60;
+  if (minutes) totalMinutes += parseInt(minutes, 10);
+
+  return totalMinutes > 0 ? totalMinutes : null;
 }

@@ -15,6 +15,14 @@ export const createTodoSchema = z.object({
     // Note: Past date validation removed to allow flexibility in testing and importing tasks
     .nullable()
     .optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]).default("medium").optional(),
+  time_estimate: z
+    .number()
+    .int("Time estimate must be a whole number")
+    .min(1, "Time estimate must be at least 1 minute")
+    .max(10080, "Time estimate cannot exceed 7 days (10080 minutes)")
+    .nullable()
+    .optional(),
 });
 
 export const updateTodoSchema = z.object({
@@ -31,6 +39,14 @@ export const updateTodoSchema = z.object({
     }, "Deadline must be a valid date")
     // Note: Past date validation removed for updates to allow editing existing tasks
     // with deadlines that may have passed since creation
+    .nullable()
+    .optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  time_estimate: z
+    .number()
+    .int("Time estimate must be a whole number")
+    .min(1, "Time estimate must be at least 1 minute")
+    .max(10080, "Time estimate cannot exceed 7 days (10080 minutes)")
     .nullable()
     .optional(),
 });

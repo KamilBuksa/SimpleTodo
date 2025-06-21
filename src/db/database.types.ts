@@ -13,6 +13,8 @@ export interface Database {
           updated_at: string;
           deadline: string | null;
           completed: boolean;
+          priority: "low" | "medium" | "high" | "urgent";
+          time_estimate: number | null;
         };
         Insert: {
           id?: string;
@@ -23,6 +25,8 @@ export interface Database {
           updated_at?: string;
           deadline?: string | null;
           completed?: boolean;
+          priority?: "low" | "medium" | "high" | "urgent";
+          time_estimate?: number | null;
         };
         Update: {
           id?: string;
@@ -33,6 +37,8 @@ export interface Database {
           updated_at?: string;
           deadline?: string | null;
           completed?: boolean;
+          priority?: "low" | "medium" | "high" | "urgent";
+          time_estimate?: number | null;
         };
       };
     };

@@ -1,73 +1,75 @@
 // Base Types
-import type { Database } from './db/database.types'
+import type { Database } from "./db/database.types";
 
 // Database Todo Type
-export type TodoEntity = Database['public']['Tables']['todos']['Row']
+export type TodoEntity = Database["public"]["Tables"]["todos"]["Row"];
 
 // Pagination
 export interface PaginationDTO {
-  total: number
-  page: number
-  limit: number
-  total_pages: number
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
 }
 
 // Todo DTOs
-export interface TodoItemDTO extends Omit<TodoEntity, 'user_id'> {
-  completed: boolean
+export interface TodoItemDTO extends Omit<TodoEntity, "user_id"> {
+  completed: boolean;
 }
 
 export interface TodoListResponseDTO {
-  todos: TodoItemDTO[]
-  pagination: PaginationDTO
+  todos: TodoItemDTO[];
+  pagination: PaginationDTO;
 }
 
 // Command Models
 export interface CreateTodoCommandDTO {
-  title: string
-  description?: string | null
-  deadline?: string | null
+  title: string;
+  description?: string | null;
+  deadline?: string | null;
+  priority?: "low" | "medium" | "high" | "urgent";
+  time_estimate?: number | null;
 }
 
-export type UpdateTodoCommandDTO = Partial<CreateTodoCommandDTO>
+export type UpdateTodoCommandDTO = Partial<CreateTodoCommandDTO>;
 
 export interface ToggleTodoStatusCommandDTO {
-  completed: boolean
+  completed: boolean;
 }
 
 // Error Response
 export interface ErrorResponseDTO {
   error: {
-    code: string
-    message: string
-    details?: Record<string, unknown>
-  }
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
 }
 
 // Query Parameters
 export interface TodoQueryParams {
-  status?: 'all' | 'completed' | 'incomplete'
-  page?: number
-  limit?: number
-  sort?: 'created_at' | 'updated_at' | 'deadline'
-  order?: 'asc' | 'desc'
+  status?: "all" | "completed" | "incomplete";
+  page?: number;
+  limit?: number;
+  sort?: "created_at" | "updated_at" | "deadline";
+  order?: "asc" | "desc";
 }
 
 // View Models for frontend state
 export interface TaskViewModel extends TodoItemDTO {
-  isEditing: boolean
-  isSaving: boolean
-  validationErrors?: Record<string, string>
+  isEditing: boolean;
+  isSaving: boolean;
+  validationErrors?: Record<string, string>;
 }
 
 export interface TaskFormViewModel {
-  initialValues?: Partial<CreateTodoCommandDTO>
-  isSubmitting: boolean
-  errors: Record<string, string>
+  initialValues?: Partial<CreateTodoCommandDTO>;
+  isSubmitting: boolean;
+  errors: Record<string, string>;
 }
 
 export interface TaskListViewModel {
-  tasks: TaskViewModel[]
-  isLoading: boolean
-  error?: string | null
-} 
+  tasks: TaskViewModel[];
+  isLoading: boolean;
+  error?: string | null;
+}

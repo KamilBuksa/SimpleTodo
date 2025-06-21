@@ -36,13 +36,17 @@ export const ThemeToggle: React.FC = () => {
       variant="outline"
       size="sm"
       onClick={toggleTheme}
-      className="transition-all duration-200 hover:scale-105"
+      className="transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg animate-fade-slide-down"
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
       {isDark ? (
-        <span className="flex items-center gap-2">☀️ Light</span>
+        <span className="flex items-center gap-2">
+          <span className="animate-bounce-gentle">☀️</span> Light
+        </span>
       ) : (
-        <span className="flex items-center gap-2">🌙 Dark</span>
+        <span className="flex items-center gap-2">
+          <span className="animate-bounce-gentle">🌙</span> Dark
+        </span>
       )}
     </Button>
   );

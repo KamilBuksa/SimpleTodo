@@ -7,7 +7,7 @@ interface DashboardProps {
   allTasks: TaskViewModel[];
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ tasks, allTasks }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ allTasks }) => {
   const stats = calculateTaskStats(allTasks);
 
   const statCards = [
@@ -45,14 +45,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ tasks, allTasks }) => {
     <div className="mb-6 space-y-4">
       {/* Main Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {statCards.map((stat) => (
-          <div key={stat.title} className={`p-4 rounded-lg border ${stat.color} ${stat.border}`}>
+        {statCards.map((stat, index) => (
+          <div
+            key={stat.title}
+            className={`p-4 rounded-lg border ${stat.color} ${stat.border} hover:scale-105 hover:shadow-lg transition-all duration-200 ease-out animate-fade-slide-up cursor-pointer`}
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium opacity-80">{stat.title}</p>
                 <p className="text-2xl font-bold">{stat.value}</p>
               </div>
-              <span className="text-2xl">{stat.icon}</span>
+              <span className="text-2xl animate-bounce-gentle">{stat.icon}</span>
             </div>
           </div>
         ))}
@@ -61,30 +65,42 @@ export const Dashboard: React.FC<DashboardProps> = ({ tasks, allTasks }) => {
       {/* Progress and Today's Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Completion Rate */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-all duration-200 ease-out">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Completion Rate</h3>
           <div className="flex items-center gap-3">
-            <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
               <div
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${stats.completionRate}%` }}
+                className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-1000 ease-out animate-scale-in"
+                style={{
+                  width: `${stats.completionRate}%`,
+                  animationDelay: "300ms",
+                }}
               />
             </div>
-            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">{stats.completionRate}%</span>
+            <span
+              className="text-lg font-semibold text-gray-900 dark:text-gray-100 animate-fade-slide-up"
+              style={{ animationDelay: "500ms" }}
+            >
+              {stats.completionRate}%
+            </span>
           </div>
         </div>
 
         {/* Today's Activity */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Today's Activity</h3>
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-all duration-200 ease-out">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Today&apos;s Activity</h3>
           <div className="space-y-1">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm animate-fade-slide-up" style={{ animationDelay: "400ms" }}>
               <span className="text-gray-600 dark:text-gray-400">Created:</span>
-              <span className="font-medium">{stats.createdToday}</span>
+              <span className="font-medium hover:scale-110 transition-transform duration-200">
+                {stats.createdToday}
+              </span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm animate-fade-slide-up" style={{ animationDelay: "500ms" }}>
               <span className="text-gray-600 dark:text-gray-400">Completed:</span>
-              <span className="font-medium text-green-600 dark:text-green-400">{stats.completedToday}</span>
+              <span className="font-medium text-green-600 dark:text-green-400 hover:scale-110 transition-transform duration-200">
+                {stats.completedToday}
+              </span>
             </div>
           </div>
         </div>

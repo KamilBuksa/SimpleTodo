@@ -87,7 +87,6 @@ export const useTasksState = (filters?: Pick<TodoQueryParams, "status">) => {
         }));
         console.log("✅ Tasks processed:", tasks.length, "tasks");
         setState({ tasks, isLoading: false, error: null });
-        toast.success("Tasks loaded");
       } catch (error) {
         console.error("❌ Failed to load tasks", error);
         setState((prev) => ({ ...prev, isLoading: false, error: "Failed to load tasks" }));
